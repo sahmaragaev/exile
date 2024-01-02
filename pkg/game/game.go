@@ -16,23 +16,23 @@ func ProcessGameMessage(telegramUserID, userMessage string) (*models.GameRespons
 		return nil, err
 	}
 
-	threadID, err := db.GetOrCreateThread(userID)
+	threadId, err := db.GetOrCreateThread(userID)
 	if err != nil {
 		log.Printf("Error getting or creating thread: %v", err)
 		return nil, err
 	}
 
-	if err := db.AddMessageToThread(threadID, userMessage); err != nil {
+	if err := db.AddMessageToThread(threadId, userMessage); err != nil {
 		log.Printf("Error adding message to thread: %v", err)
 		return nil, fmt.Errorf("error adding message to thread: %w", err)
 	}
 
-	if err := db.RunThread(threadID); err != nil {
+	if err := db.RunThread(threadId); err != nil {
 		log.Printf("Error running thread: %v", err)
 		return nil, fmt.Errorf("error running thread: %w", err)
 	}
 
-	immediateResponse, err := db.GetGameResponse(threadID)
+	immediateResponse, err := db.GetGameResponse(threadId)
 	if err == nil && immediateResponse != nil {
 		return immediateResponse, nil
 	}
@@ -43,7 +43,7 @@ func ProcessGameMessage(telegramUserID, userMessage string) (*models.GameRespons
 	go func() {
 		time.Sleep(5 * time.Second)
 		for i := 0; i < 5; i++ {
-			response, err := db.GetGameResponse(threadID)
+			response, err := db.GetGameResponse(threadId)
 			if err == nil && response != nil {
 				responseChan <- response
 				return

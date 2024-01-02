@@ -58,7 +58,13 @@ func createThread(userId string) (string, error) {
 		log.Printf("Error sending request to OpenAI API: %v", err)
 		return "", fmt.Errorf("error sending request to OpenAI API: %w", err)
 	}
-	defer response.Body.Close()
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Printf("Error closing IO: %v", err)
+		}
+	}(response.Body)
 
 	var threadResponse struct {
 		ID string `json:"id"`
@@ -106,7 +112,13 @@ func AddMessageToThread(threadID, message string) error {
 		log.Printf("Error sending request to OpenAI API: %v", err)
 		return fmt.Errorf("error sending request to OpenAI API: %w", err)
 	}
-	defer response.Body.Close()
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Printf("Error closing IO: %v", err)
+		}
+	}(response.Body)
 
 	responseBody, _ := io.ReadAll(response.Body)
 	log.Printf("Response from adding message: %s", string(responseBody))
@@ -139,7 +151,13 @@ func RunThread(threadID string) error {
 		log.Printf("Error sending request to run thread: %v", err)
 		return err
 	}
-	defer response.Body.Close()
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Printf("Error closing IO: %v", err)
+		}
+	}(response.Body)
 
 	responseBody, err := io.ReadAll(response.Body)
 	if err != nil {
@@ -167,7 +185,13 @@ func GetGameResponse(threadID string) (*models.GameResponse, error) {
 		log.Printf("Error sending request to get game response: %v", err)
 		return nil, err
 	}
-	defer response.Body.Close()
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Printf("Error closing IO: %v", err)
+		}
+	}(response.Body)
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {

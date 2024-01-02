@@ -32,11 +32,10 @@ func getDbCollection(collectionName string) *mongo.Collection {
 }
 
 func EnsureUserExists(telegramId string) (primitive.ObjectID, error) {
-	collection := UserCollection
 	filter := bson.M{"username": telegramId}
 	var user models.User
 
-	err := collection.FindOne(context.Background(), filter).Decode(&user)
+	err := UserCollection.FindOne(context.Background(), filter).Decode(&user)
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		return createUser(telegramId)
 	} else if err != nil {
@@ -48,7 +47,6 @@ func EnsureUserExists(telegramId string) (primitive.ObjectID, error) {
 }
 
 func createUser(telegramId string) (primitive.ObjectID, error) {
-	collection := UserCollection
 	password := utils.GenerateRandomPassword(10)
 	user := models.User{
 		ID:          primitive.NewObjectID(),
@@ -57,7 +55,7 @@ func createUser(telegramId string) (primitive.ObjectID, error) {
 		Password:    password,
 	}
 
-	result, err := collection.InsertOne(context.Background(), user)
+	result, err := UserCollection.InsertOne(context.Background(), user)
 	if err != nil {
 		log.Printf("Error inserting new user into MongoDB: %v", err)
 		return primitive.NilObjectID, err
